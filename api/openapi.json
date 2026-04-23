@@ -196,6 +196,18 @@
         "tags": [
           "Items"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter resources by title, type, or description (case-insensitive)",
+              "example": "Conference"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List persisted items",
