@@ -13,7 +13,9 @@ const HealthResponseSchema = z.object({
 
 const ItemSchema = z.object({
   id: z.number().int().openapi({ example: 1 }),
-  title: z.string().min(1).max(120).openapi({ example: 'Build a workshop API' }),
+  title: z.string().min(1).max(120).openapi({ example: 'Conference Room A' }),
+  description: z.string().max(500).nullable().openapi({ example: 'Main conference room on the 2nd floor' }),
+  resourceType: z.string().max(60).nullable().openapi({ example: 'Room' }),
   createdAt: z.string().datetime().openapi({ example: '2024-01-01T00:00:00.000Z' })
 }).openapi('Item')
 
@@ -22,8 +24,16 @@ const ItemListResponseSchema = z.object({
 }).openapi('ItemListResponse')
 
 const CreateItemSchema = z.object({
-  title: z.string().trim().min(1).max(120).openapi({ example: 'Build a workshop API' })
+  title: z.string().trim().min(1).max(120).openapi({ example: 'Conference Room A' }),
+  description: z.string().trim().max(500).nullish().openapi({ example: 'Main conference room on the 2nd floor' }),
+  resourceType: z.string().trim().max(60).nullish().openapi({ example: 'Room' })
 }).openapi('CreateItem')
+
+const UpdateItemSchema = z.object({
+  title: z.string().trim().min(1).max(120).optional().openapi({ example: 'Conference Room A' }),
+  description: z.string().trim().max(500).nullish().openapi({ example: 'Main conference room on the 2nd floor' }),
+  resourceType: z.string().trim().max(60).nullish().openapi({ example: 'Room' })
+}).openapi('UpdateItem')
 
 const ItemParamsSchema = z.object({
   id: z.coerce.number().int().positive().openapi({
@@ -34,6 +44,10 @@ const ItemParamsSchema = z.object({
     example: 1
   })
 }).openapi('ItemParams')
+
+const NotFoundSchema = z.object({
+  error: z.string()
+}).openapi('NotFound')
 
 const rootRoute = createRoute({
   method: 'get',
@@ -123,9 +137,46 @@ const deleteItemRoute = createRoute({
   }
 })
 
-const toItemResponse = (item: { id: number; title: string; createdAt: Date }) => ({
+const updateItemRoute = createRoute({
+  method: 'patch',
+  path: '/items/{id}',
+  tags: ['Items'],
+  request: {
+    params: ItemParamsSchema,
+    body: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: UpdateItemSchema
+        }
+      }
+    }
+  },
+  responses: {
+    200: {
+      description: 'Update a persisted item',
+      content: {
+        'application/json': {
+          schema: ItemSchema
+        }
+      }
+    },
+    404: {
+      description: 'Item not found',
+      content: {
+        'application/json': {
+          schema: NotFoundSchema
+        }
+      }
+    }
+  }
+})
+
+const toItemResponse = (item: { id: number; title: string; description: string | null; resourceType: string | null; createdAt: Date }) => ({
   id: item.id,
   title: item.title,
+  description: item.description,
+  resourceType: item.resourceType,
   createdAt: item.createdAt.toISOString()
 })
 
@@ -178,10 +229,12 @@ app.openapi(listItemsRoute, async (c) => {
 })
 
 app.openapi(createItemRoute, async (c) => {
-  const { title } = c.req.valid('json')
+  const { title, description, resourceType } = c.req.valid('json')
   const item = await prisma.item.create({
     data: {
-      title
+      title,
+      description: description || null,
+      resourceType: resourceType || null
     }
   })
 
@@ -198,6 +251,27 @@ app.openapi(deleteItemRoute, async (c) => {
   })
 
   return c.body(null, 204)
+})
+
+app.openapi(updateItemRoute, async (c) => {
+  const { id } = c.req.valid('param')
+  const { title, description, resourceType } = c.req.valid('json')
+
+  const existing = await prisma.item.findUnique({ where: { id } })
+  if (!existing) {
+    return c.json({ error: 'Item not found' }, 404)
+  }
+
+  const item = await prisma.item.update({
+    where: { id },
+    data: {
+      ...(title !== undefined && { title }),
+      description: description === undefined ? existing.description : (description || null),
+      resourceType: resourceType === undefined ? existing.resourceType : (resourceType || null)
+    }
+  })
+
+  return c.json(toItemResponse(item), 200)
 })
 
 export type AppType = typeof app
