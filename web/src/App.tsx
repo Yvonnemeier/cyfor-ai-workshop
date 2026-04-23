@@ -188,6 +188,30 @@ export default function App() {
     if (!bookingResourceId || bookMutation.isPending) return;
     const { title, bookerName, bookerEmail, bookerPhone, attendees, notes, startAt, endAt, agreedToTerms } = bookingForm;
     if (!title.trim() || !bookerName.trim() || !startAt || !endAt || !agreedToTerms) return;
+
+    const start = new Date(startAt);
+    const end = new Date(endAt);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      setBookingError("Please enter valid start and end dates.");
+      return;
+    }
+    if (start < new Date()) {
+      setBookingError("Start date must be in the future.");
+      return;
+    }
+    if (end <= start) {
+      setBookingError("End date must be after start date.");
+      return;
+    }
+
+    const parsedAttendees = attendees ? parseInt(attendees, 10) : null;
+    if (parsedAttendees !== null && (isNaN(parsedAttendees) || parsedAttendees < 1 || parsedAttendees > 9999)) {
+      setBookingError("Number of attendees must be between 1 and 9999.");
+      return;
+    }
+
+    setBookingError(null);
     bookMutation.mutate({
       data: {
         itemId: bookingResourceId,
@@ -195,10 +219,10 @@ export default function App() {
         bookerName: bookerName.trim(),
         bookerEmail: bookerEmail.trim() || null,
         bookerPhone: bookerPhone.trim() || null,
-        attendees: attendees ? parseInt(attendees, 10) : null,
+        attendees: parsedAttendees,
         notes: notes.trim() || null,
-        startAt: new Date(startAt).toISOString(),
-        endAt: new Date(endAt).toISOString(),
+        startAt: start.toISOString(),
+        endAt: end.toISOString(),
       },
     });
   };

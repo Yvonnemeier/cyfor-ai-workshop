@@ -375,7 +375,9 @@ const toReservationResponse = (r: {
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   draft: ['confirmed', 'cancelled'],
-  confirmed: ['cancelled', 'completed']
+  confirmed: ['cancelled', 'completed'],
+  cancelled: [],
+  completed: []
 }
 
 const defaultCorsOrigins = ['http://localhost:4173', 'http://localhost:5173']
@@ -519,38 +521,36 @@ app.openapi(createReservationRoute, async (c) => {
     return c.json({ error: 'endAt must be after startAt' }, 422)
   }
 
+  if (start < new Date()) {
+    return c.json({ error: 'Cannot create a reservation in the past' }, 422)
+  }
+
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) {
     return c.json({ error: 'Resource not found' }, 404)
   }
 
-  const overlap = await prisma.reservation.findFirst({
-    where: {
-      itemId,
-      status: 'confirmed',
-      startAt: { lt: end },
-      endAt: { gt: start }
-    }
+  const reservation = await prisma.$transaction(async (tx) => {
+    const overlap = await tx.reservation.findFirst({
+      where: { itemId, status: 'confirmed', startAt: { lt: end }, endAt: { gt: start } }
+    })
+    if (overlap) return null
+
+    return tx.reservation.create({
+      data: {
+        itemId, title, bookerName,
+        bookerEmail: bookerEmail || null,
+        bookerPhone: bookerPhone || null,
+        attendees: attendees || null,
+        notes: notes || null,
+        startAt: start, endAt: end, status: 'draft'
+      }
+    })
   })
 
-  if (overlap) {
+  if (!reservation) {
     return c.json({ error: 'This time slot is already booked for the selected resource' }, 409)
   }
-
-  const reservation = await prisma.reservation.create({
-    data: {
-      itemId,
-      title,
-      bookerName,
-      bookerEmail: bookerEmail || null,
-      bookerPhone: bookerPhone || null,
-      attendees: attendees || null,
-      notes: notes || null,
-      startAt: start,
-      endAt: end,
-      status: 'draft'
-    }
-  })
 
   return c.json(toReservationResponse(reservation), 201)
 })
@@ -581,19 +581,26 @@ app.openapi(patchReservationRoute, async (c) => {
   }
 
   if (status === 'confirmed') {
-    const overlap = await prisma.reservation.findFirst({
-      where: {
-        id: { not: id },
-        itemId: reservation.itemId,
-        status: 'confirmed',
-        startAt: { lt: reservation.endAt },
-        endAt: { gt: reservation.startAt }
-      }
+    const updated = await prisma.$transaction(async (tx) => {
+      const overlap = await tx.reservation.findFirst({
+        where: {
+          id: { not: id },
+          itemId: reservation.itemId,
+          status: 'confirmed',
+          startAt: { lt: reservation.endAt },
+          endAt: { gt: reservation.startAt }
+        }
+      })
+      if (overlap) return null
+
+      return tx.reservation.update({ where: { id }, data: { status } })
     })
 
-    if (overlap) {
+    if (!updated) {
       return c.json({ error: 'This time slot is already confirmed for the selected resource' }, 409)
     }
+
+    return c.json(toReservationResponse(updated), 200)
   }
 
   const updated = await prisma.reservation.update({ where: { id }, data: { status } })
