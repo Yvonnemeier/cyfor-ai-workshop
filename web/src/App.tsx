@@ -20,12 +20,14 @@ export default function App() {
   const [createForm, setCreateForm] = useState<ResourceForm>(emptyForm());
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<ResourceForm>(emptyForm());
+  const [search, setSearch] = useState("");
 
   const queryClient = useQueryClient();
+  const searchParam = search.trim() || undefined;
   const refreshItems = () =>
-    queryClient.invalidateQueries({ queryKey: getGetItemsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetItemsQueryKey(searchParam ? { search: searchParam } : undefined) });
 
-  const itemsQuery = useGetItems();
+  const itemsQuery = useGetItems(searchParam ? { search: searchParam } : undefined);
 
   const createMutation = usePostItems({
     mutation: {
@@ -156,7 +158,15 @@ export default function App() {
 
         {/* Resource list */}
         <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-slate-700">Resources</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-medium text-slate-700">Resources</h2>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search resources…"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-slate-500 w-48"
+            />
+          </div>
 
           {itemsQuery.isPending && (
             <p className="mt-3 text-sm text-slate-600">Loading resources...</p>
@@ -254,7 +264,9 @@ export default function App() {
                 )}
               </ul>
             ) : (
-              <p className="mt-3 text-sm text-slate-600">No resources yet.</p>
+              <p className="mt-3 text-sm text-slate-600">
+                {search.trim() ? "No resources match your search." : "No resources yet."}
+              </p>
             )
           )}
         </section>
