@@ -93,18 +93,18 @@ export default function App() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900">
+    <main className="min-h-screen bg-[#f4f7fa] px-4 py-10 text-[#18293d]">
       <div className="mx-auto max-w-xl space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-semibold">Resources</h1>
-          <p className="text-sm text-slate-600">
+        <header className="space-y-1">
+          <h1 className="text-xl font-semibold text-[#18293d]">Resources</h1>
+          <p className="text-sm text-[#4c637a]">
             Add, edit, and remove bookable resources.
           </p>
         </header>
 
         {/* Create form */}
         <form
-          className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+          className="flex flex-col gap-3 rounded-lg border border-[#cdd7e0] bg-white p-4"
           onSubmit={handleCreate}
         >
           <input
@@ -112,14 +112,14 @@ export default function App() {
             onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
             placeholder="Resource name"
             maxLength={120}
-            className="rounded-md border border-slate-300 px-3 py-2 text-base outline-none focus:border-slate-500"
+            className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e]"
           />
           <input
             value={createForm.resourceType}
             onChange={(e) => setCreateForm((f) => ({ ...f, resourceType: e.target.value }))}
             placeholder="Type / category (e.g. Room, Vehicle)"
             maxLength={60}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+            className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e]"
           />
           <textarea
             value={createForm.description}
@@ -127,49 +127,49 @@ export default function App() {
             placeholder="Description (optional)"
             maxLength={500}
             rows={2}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 resize-none"
+            className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e] resize-none"
           />
           <button
             type="submit"
             disabled={!createForm.title.trim() || createMutation.isPending}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="rounded-md bg-[#1b3d5e] px-4 py-2 text-sm font-medium text-white hover:bg-[#153050] disabled:cursor-not-allowed disabled:bg-[#9aabb8]"
           >
             {createMutation.isPending ? "Adding..." : "Add resource"}
           </button>
         </form>
 
         {createMutation.isError && (
-          <p className="text-sm text-rose-600">
+          <p className="text-sm text-[#b91c1c]">
             Could not add the resource: {createMutation.error.message}
           </p>
         )}
         {deleteMutation.isError && (
-          <p className="text-sm text-rose-600">
+          <p className="text-sm text-[#b91c1c]">
             Could not remove the resource: {deleteMutation.error.message}
           </p>
         )}
         {updateMutation.isError && (
-          <p className="text-sm text-rose-600">
+          <p className="text-sm text-[#b91c1c]">
             Could not update the resource: {updateMutation.error.message}
           </p>
         )}
 
         {/* Resource list */}
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-slate-700">Resources</h2>
+        <section className="rounded-lg border border-[#cdd7e0] bg-white p-4">
+          <h2 className="text-sm font-medium text-[#18293d]">Resources</h2>
 
           {itemsQuery.isPending && (
-            <p className="mt-3 text-sm text-slate-600">Loading resources...</p>
+            <p className="mt-3 text-sm text-[#4c637a]">Loading resources...</p>
           )}
           {itemsQuery.isError && (
-            <p className="mt-3 text-sm text-rose-600">
+            <p className="mt-3 text-sm text-[#b91c1c]">
               Could not load resources: {itemsQuery.error.message}
             </p>
           )}
 
           {!itemsQuery.isPending && !itemsQuery.isError && (
             resources.length > 0 ? (
-              <ul className="mt-3 divide-y divide-slate-200">
+              <ul className="mt-3 divide-y divide-[#cdd7e0]">
                 {resources.map((resource) =>
                   editingId === resource.id ? (
                     /* Inline edit row */
@@ -179,14 +179,14 @@ export default function App() {
                         onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
                         placeholder="Resource name"
                         maxLength={120}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+                        className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e]"
                       />
                       <input
                         value={editForm.resourceType}
                         onChange={(e) => setEditForm((f) => ({ ...f, resourceType: e.target.value }))}
                         placeholder="Type / category"
                         maxLength={60}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+                        className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e]"
                       />
                       <textarea
                         value={editForm.description}
@@ -194,14 +194,14 @@ export default function App() {
                         placeholder="Description"
                         maxLength={500}
                         rows={2}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 resize-none"
+                        className="rounded-md border border-[#cdd7e0] px-3 py-2 text-sm outline-none focus:border-[#1b3d5e] resize-none"
                       />
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => handleSave(resource.id)}
                           disabled={!editForm.title.trim() || updateMutation.isPending}
-                          className="rounded-md bg-slate-900 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                          className="rounded-md bg-[#1b3d5e] px-3 py-1 text-sm font-medium text-white hover:bg-[#153050] disabled:cursor-not-allowed disabled:bg-[#9aabb8]"
                         >
                           {updateMutation.isPending ? "Saving..." : "Save"}
                         </button>
@@ -209,7 +209,7 @@ export default function App() {
                           type="button"
                           onClick={cancelEdit}
                           disabled={updateMutation.isPending}
-                          className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 disabled:cursor-not-allowed"
+                          className="rounded-md border border-[#cdd7e0] px-3 py-1 text-sm text-[#18293d] hover:bg-[#f4f7fa] disabled:cursor-not-allowed disabled:text-[#9aabb8]"
                         >
                           Cancel
                         </button>
@@ -218,15 +218,15 @@ export default function App() {
                   ) : (
                     /* Normal row */
                     <li key={resource.id} className="flex items-start justify-between gap-3 py-3">
-                      <div className="min-w-0 space-y-0.5">
-                        <p className="font-medium truncate">{resource.title}</p>
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-medium text-[#18293d] truncate">{resource.title}</p>
                         {resource.resourceType && (
-                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          <span className="inline-block bg-[#e4ecf4] text-[#1b3d5e] text-xs font-medium uppercase tracking-wide px-2 py-0.5 rounded">
                             {resource.resourceType}
-                          </p>
+                          </span>
                         )}
                         {resource.description && (
-                          <p className="text-sm text-slate-600">{resource.description}</p>
+                          <p className="text-sm text-[#4c637a]">{resource.description}</p>
                         )}
                       </div>
                       <div className="flex shrink-0 gap-2">
@@ -234,7 +234,7 @@ export default function App() {
                           type="button"
                           onClick={() => startEdit(resource)}
                           disabled={deleteMutation.isPending && deletingId === resource.id}
-                          className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 disabled:cursor-not-allowed disabled:text-slate-400"
+                          className="rounded-md border border-[#cdd7e0] px-3 py-1 text-sm text-[#18293d] hover:bg-[#f4f7fa] disabled:cursor-not-allowed disabled:text-[#9aabb8]"
                         >
                           Edit
                         </button>
@@ -242,7 +242,7 @@ export default function App() {
                           type="button"
                           onClick={() => deleteMutation.mutate({ id: resource.id })}
                           disabled={deleteMutation.isPending}
-                          className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+                          className="rounded-md border border-[#cdd7e0] px-3 py-1 text-sm text-[#18293d] hover:bg-[#f4f7fa] disabled:cursor-not-allowed disabled:text-[#9aabb8]"
                         >
                           {deleteMutation.isPending && deletingId === resource.id
                             ? "Removing..."
@@ -254,7 +254,7 @@ export default function App() {
                 )}
               </ul>
             ) : (
-              <p className="mt-3 text-sm text-slate-600">No resources yet.</p>
+              <p className="mt-3 text-sm text-[#4c637a]">No resources yet.</p>
             )
           )}
         </section>
