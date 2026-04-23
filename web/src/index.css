@@ -12,15 +12,20 @@
   --color-text-secondary: #4c637a;
   --color-action: #1b3d5e;
   --color-action-hover: #153050;
-  --color-badge-bg: #e4ecf4;
-  --color-badge-text: #1b3d5e;
+  --color-success: #0f766e;
+  --color-success-hover: #0d6b64;
+  --color-edit: #0369a1;
+  --color-edit-bg-hover: #f0f9ff;
+  --color-danger: #dc2626;
+  --color-danger-bg-hover: #fef2f2;
+  --color-badge-bg: #dbeafe;
+  --color-badge-text: #1d4ed8;
   --color-error: #b91c1c;
   --color-disabled: #9aabb8;
 }
 
 :root {
   color: #18293d;
-  background-color: #f4f7fa;
   font-family: var(--font-sans);
 }
 
@@ -38,5 +43,6 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f4f7fa;
+  background: linear-gradient(135deg, #1a4731 0%, #2d6a4f 30%, #52b788 60%, #95d5b2 100%);
+  background-attachment: fixed;
 }

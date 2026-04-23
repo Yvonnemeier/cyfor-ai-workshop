@@ -115,6 +115,17 @@
           "title"
         ]
       },
+      "Conflict": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
       "NotFound": {
         "type": "object",
         "properties": {
@@ -148,6 +159,183 @@
             "example": "Room"
           }
         }
+      },
+      "Reservation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "itemId": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "Team standup"
+          },
+          "bookerName": {
+            "type": "string",
+            "example": "Alice Smith"
+          },
+          "bookerEmail": {
+            "type": "string",
+            "nullable": true,
+            "example": "alice@example.com"
+          },
+          "bookerPhone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+47 900 00 000"
+          },
+          "attendees": {
+            "type": "integer",
+            "nullable": true,
+            "example": 5
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true,
+            "example": "Please set up projector beforehand."
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-24T09:00:00.000Z"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-24T10:00:00.000Z"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "cancelled",
+              "completed"
+            ],
+            "example": "draft"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-23T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "itemId",
+          "title",
+          "bookerName",
+          "bookerEmail",
+          "bookerPhone",
+          "attendees",
+          "notes",
+          "startAt",
+          "endAt",
+          "status",
+          "createdAt"
+        ]
+      },
+      "ReservationListResponse": {
+        "type": "object",
+        "properties": {
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reservation"
+            }
+          }
+        },
+        "required": [
+          "reservations"
+        ]
+      },
+      "CreateReservation": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "example": "Team standup"
+          },
+          "bookerName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "example": "Alice Smith"
+          },
+          "bookerEmail": {
+            "type": "string",
+            "nullable": true,
+            "format": "email",
+            "example": "alice@example.com"
+          },
+          "bookerPhone": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 30,
+            "example": "+47 900 00 000"
+          },
+          "attendees": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "example": 5
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000,
+            "example": "Please set up projector beforehand."
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-24T09:00:00.000Z"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-24T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "itemId",
+          "title",
+          "bookerName",
+          "startAt",
+          "endAt"
+        ]
+      },
+      "PatchReservation": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "cancelled",
+              "completed"
+            ],
+            "example": "confirmed"
+          }
+        },
+        "required": [
+          "status"
+        ]
       }
     },
     "parameters": {}
@@ -270,6 +458,16 @@
         "responses": {
           "204": {
             "description": "Remove a persisted item"
+          },
+          "409": {
+            "description": "Resource has active reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
+                }
+              }
+            }
           }
         }
       },
@@ -317,6 +515,224 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservations": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "description": "Filter by resource ID",
+              "example": 1
+            },
+            "required": false,
+            "name": "itemId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "confirmed",
+                "cancelled",
+                "completed"
+              ],
+              "description": "Filter by status",
+              "example": "confirmed"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List reservations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reservations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reservation created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Time slot already booked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid date range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservations/{id}": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "example": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a reservation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Reservations"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "example": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchReservation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reservation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Time slot already confirmed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
                 }
               }
             }
