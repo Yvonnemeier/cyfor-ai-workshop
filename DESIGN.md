@@ -34,10 +34,16 @@ These tokens are defined as Tailwind CSS `@theme` custom properties in `web/src/
 | `--color-border` | `#cdd7e0` | Borders, dividers |
 | `--color-text-primary` | `#18293d` | Body text, headings |
 | `--color-text-secondary` | `#4c637a` | Captions, helper text |
-| `--color-action` | `#1b3d5e` | Primary buttons, links |
+| `--color-action` | `#1b3d5e` | Primary buttons (Add resource) |
 | `--color-action-hover` | `#153050` | Hover state for primary action |
-| `--color-badge-bg` | `#e4ecf4` | Resource-type badge background |
-| `--color-badge-text` | `#1b3d5e` | Resource-type badge text |
+| `--color-success` | `#0f766e` | Save / confirm actions |
+| `--color-success-hover` | `#0d6b64` | Hover state for save action |
+| `--color-edit` | `#0369a1` | Edit button text and border |
+| `--color-edit-bg-hover` | `#f0f9ff` | Edit button hover background |
+| `--color-danger` | `#dc2626` | Remove button hover text and border |
+| `--color-danger-bg-hover` | `#fef2f2` | Remove button hover background |
+| `--color-badge-bg` | `#dbeafe` | Resource-type badge background |
+| `--color-badge-text` | `#1d4ed8` | Resource-type badge text |
 | `--color-error` | `#b91c1c` | Error messages |
 | `--color-disabled` | `#9aabb8` | Disabled controls |
 
