@@ -3,11 +3,24 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Design system tokens — see DESIGN.md */
+  --color-bg: #f4f7fa;
+  --color-surface: #ffffff;
+  --color-border: #cdd7e0;
+  --color-text-primary: #18293d;
+  --color-text-secondary: #4c637a;
+  --color-action: #1b3d5e;
+  --color-action-hover: #153050;
+  --color-badge-bg: #e4ecf4;
+  --color-badge-text: #1b3d5e;
+  --color-error: #b91c1c;
+  --color-disabled: #9aabb8;
 }
 
 :root {
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: #18293d;
+  background-color: #f4f7fa;
   font-family: var(--font-sans);
 }
 
@@ -25,5 +38,5 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #f4f7fa;
 }
